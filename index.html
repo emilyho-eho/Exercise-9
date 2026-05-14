@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barrio&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: url('table.jpeg') center center / cover no-repeat;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text y='26' font-size='26'>✂️</text></svg>") 8 16, crosshair;
+    }
+    #hint {
+      padding: 20px;
+      position: absolute;
+      top: 20px;
+      width: 100%;
+      text-align: center;
+      font-family: 'Barrio', cursive;
+      font-size: 24px;
+      color: #000000;
+      letter-spacing: 0.06em;
+      pointer-events: none;
+    }
+    .paper {
+      position: absolute;
+      width: 220px;
+      height: 300px;
+      border-radius: 4px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .half {
+      position: absolute;
+      width: 220px;
+      height: 300px;
+      pointer-events: none;
+    }
+    .half-inner {
+      width: 220px;
+      height: 300px;
+      border-radius: 4px;
+      position: absolute;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+  <p id="hint">click to cut the paper</p>
+
+  <script>
+    var colors = ['#f5f0e8','#e8f0f5','#f5e8ee','#eef5e8','#f5eee8','#e8eef5','#f0e8f5','#f5f5e8'];
+    var cutting = false;
+
+    function randColor() {
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function makePaper() {
+      var paper = document.createElement('div');
+      paper.className = 'paper';
+      paper.style.background = randColor();
+      paper.style.left = (window.innerWidth / 2 - 110) + 'px';
+      paper.style.top = (window.innerHeight / 2 - 150) + 'px';
+      document.body.appendChild(paper);
+
+      paper.addEventListener('click', function() {
+        if (cutting) return;
+        cutting = true;
+        cutPaper(paper);
+      });
+    }
+
+    function cutPaper(paper) {
+      var bg = paper.style.background;
+      var left = paper.style.left;
+      var top = paper.style.top;
+      paper.remove();
+
+      var leftHalf = document.createElement('div');
+      leftHalf.className = 'half';
+      leftHalf.style.left = left;
+      leftHalf.style.top = top;
+      leftHalf.style.clipPath = 'inset(0 50% 0 0)';
+      var li = document.createElement('div');
+      li.className = 'half-inner';
+      li.style.background = bg;
+      leftHalf.appendChild(li);
+
+      var rightHalf = document.createElement('div');
+      rightHalf.className = 'half';
+      rightHalf.style.left = left;
+      rightHalf.style.top = top;
+      rightHalf.style.clipPath = 'inset(0 0 0 50%)';
+      var ri = document.createElement('div');
+      ri.className = 'half-inner';
+      ri.style.background = bg;
+      rightHalf.appendChild(ri);
+
+      document.body.appendChild(leftHalf);
+      document.body.appendChild(rightHalf);
+
+      leftHalf.style.transition = 'transform 0.6s ease, opacity 0.6s ease';
+      rightHalf.style.transition = 'transform 0.6s ease, opacity 0.6s ease';
+
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          leftHalf.style.transform = 'translateX(-300px)';
+          leftHalf.style.opacity = '0';
+          rightHalf.style.transform = 'translateX(300px)';
+          rightHalf.style.opacity = '0';
+        });
+      });
+
+      setTimeout(function() {
+        leftHalf.remove();
+        rightHalf.remove();
+        cutting = false;
+        makePaper();
+      }, 600);
+    }
+
+    makePaper();
+  </script>
+</body>
+</html>
